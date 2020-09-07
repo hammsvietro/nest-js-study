@@ -1,50 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, In } from 'typeorm';
 import { User } from './models/user.model';
 import { Pet } from './models/pet.model';
 
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [{
-    id: 1,
-    name: 'Pedro',
-    pets: [{id: 1, animal: 'dog', name: 'ajudante'}, {id: 2, animal: 'hamster', name: 'dunkalicious'}]
-  },
-  {
-    id: 2,
-    name: 'ana',
-    pets: [{id: 3, animal: 'dog', name: 'lucky'}]
-  }];
-  
-  private userId = 3;
-  private petId = 4;
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(Pet)
+    private petsRepository: Repository<Pet>
+  )  {}
 
-
-  create(user: User){
-    user.pets = [];
-    user.id = this.userId;
-    this.users.push(user);
-    this.userId++
-    return user;
+  async create(user: User) {
+    return await this.usersRepository.save(user);
   }
 
-  addPet(id: number, pet: Pet) {
-    pet.id = this.petId;
-
-    this.users.forEach(user => {
-      if(user.id == id) {
-        user.pets.push(pet);
-      }      
-    });
-    
-    this.petId++;
+  async addPet(userId: number, pet: Pet) {
+    let newPet = new Pet();
+    newPet.animal = pet.animal;
+    newPet.name = pet.name;
+    newPet.user = {id: userId} as User;
+    return await this.petsRepository.save(newPet);
   }
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    let result = await this.usersRepository.find({relations: ['pets']});
+    return result;
   }
 
-  find(id: number): User {
-    return this.users.find(user => user.id == id);
+  async find(id: number): Promise<User> {
+    return await this.usersRepository.findOne(id);
   }
 }

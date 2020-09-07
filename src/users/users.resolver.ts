@@ -1,5 +1,6 @@
 import { Resolver, ResolveField, Args, Query, Int, Mutation, NullableList } from '@nestjs/graphql';
 import { User } from './models/user.model';
+import { Pet } from './models/pet.model';
 import { UsersService } from './users.service'
 
 
@@ -22,6 +23,11 @@ export class UsersResolver {
   @Mutation(() => User)
   async addUser(@Args('name') name: string) {
     return this.usersService.create({name})
+  }
+
+  @Mutation(() => Pet)
+  async addPet(@Args('id', Int) id: number, @Args('animal') animal: string,@Args('name') name: string) {
+    return this.usersService.addPet(id, {animal: animal, name});
   }
 
 }
