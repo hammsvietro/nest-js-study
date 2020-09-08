@@ -10,6 +10,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    
     @InjectRepository(Pet)
     private petsRepository: Repository<Pet>
   )  {}
@@ -20,9 +21,11 @@ export class UsersService {
 
   async addPet(userId: number, pet: Pet) {
     let newPet = new Pet();
+    
     newPet.animal = pet.animal;
     newPet.name = pet.name;
-    newPet.user = {id: userId} as User;
+    newPet.user = {id: userId} as User; // TODO: Create user and pet Request DTO. 
+
     return await this.petsRepository.save(newPet);
   }
 
